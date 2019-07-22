@@ -20,8 +20,8 @@ class VegaGraph():
         
     def generate_visual(self):
         self._chart = Chart(self._data).mark_point().encode(
-        x='time_stamp:Q',
-        y='value:O'
+        x='time_stamp',
+        y='value'
         ).interactive()
         
     def export_visual(self, kind):
