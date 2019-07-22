@@ -4,13 +4,13 @@ from flask import Flask,  request
 
 from classes import VegaGraph, SensLogData
 
-app = Flask(__name__)
+application = Flask(__name__)
 
-@app.route('/get_number', methods=['GET'])
+@application.route('/get_number', methods=['GET'])
 def get_number():
     return json.dumps({'number':'5'})
 
-@app.route('/get_graph', methods=['GET'])
+@application.route('/get_graph', methods=['GET'])
 def get_params_of_get_graph():
     timestamp_from=str(request.args.get('time_from'))
     timestamp_to=str(request.args.get('time_to'))
@@ -31,4 +31,4 @@ def do_send_graph(endpoint_url, unit_id, timestamp_from, timestamp_to, graph_typ
     return vg.export_visual(format)
 
 if __name__ == "__main__":
-    app.run(debug=True,  host='0.0.0.0', port=5000)
+    application.run()
