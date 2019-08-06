@@ -57,9 +57,12 @@ def do_send_graph(endpoint_url, unit_id, timestamp_from, timestamp_to, graph_typ
         s=SensLogData(endpoint=endpoint_url,timestamp_from=timestamp_from,timestamp_to=timestamp_to, unit_id=i, sensor_id=sensor_id)
         s.set_request_params()
         s.download_data()
+        print(s.get_data())
         if len(s.get_data().index)>0:
             frames.append(s.get_data())
-    df=pd.concat(frames)
+        elif len(unit_id['id'])==1:
+            return json.loads('{"error":"the call has returned empty dataset"}')
+    df=pd.concat(frames) if len(frames)>1 else frames[0]
     print(df.head())
     if sensor_id!=None:
         vg=VegaGraph(title=("Sensor "+str(sensor_id)), type=graph_type,data=df)
@@ -73,10 +76,25 @@ def do_send_graph(endpoint_url, unit_id, timestamp_from, timestamp_to, graph_typ
             charts.append(vg.get_chart())
         return sum_v(charts).to_json()
 
-    
 @application.route("/")
 def index():
+    return json.dumps({"all sensors across all units":"/example1","one sensor across all units":"/example2","all sensors of one unit":"/example3","one sensor of one unit":"/example4"})
+    
+@application.route("/example1")
+def example1():
     return render_template("sensors.html", vegajsobject=(do_send_graph(endpoint_url='http://foodie.lesprojekt.cz:8080/senslogOT/rest/observation', unit_id={"id":[1305167549144045,1305167549158198,1305167549167050,1305167549173046,1305167549167886,1305167549149707]}, timestamp_from=(datetime.datetime.now()-datetime.timedelta(hours=72)).strftime('%Y-%m-%d %H:%M:%S'), timestamp_to=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), graph_type='line', format='json')));
+
+@application.route("/example2")
+def example2():
+    return render_template("sensors.html", vegajsobject=(do_send_graph(endpoint_url='http://foodie.lesprojekt.cz:8080/senslogOT/rest/observation', unit_id={"id":[1305167549144045,1305167549158198,1305167549167050,1305167549173046,1305167549167886,1305167549149707]}, timestamp_from=(datetime.datetime.now()-datetime.timedelta(hours=72)).strftime('%Y-%m-%d %H:%M:%S'), timestamp_to=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), graph_type='line', format='json', sensor_id=540090004)));
+
+@application.route("/example3")
+def example3():
+    return render_template("sensors.html", vegajsobject=(do_send_graph(endpoint_url='http://foodie.lesprojekt.cz:8080/senslogOT/rest/observation', unit_id={"id":[1305167549167050]}, timestamp_from=(datetime.datetime.now()-datetime.timedelta(hours=72)).strftime('%Y-%m-%d %H:%M:%S'), timestamp_to=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), graph_type='line', format='json')));
+
+@application.route("/example4")
+def example4():
+    return render_template("sensors.html", vegajsobject=(do_send_graph(endpoint_url='http://foodie.lesprojekt.cz:8080/senslogOT/rest/observation', unit_id={"id":[1305167549167050]}, timestamp_from=(datetime.datetime.now()-datetime.timedelta(hours=72)).strftime('%Y-%m-%d %H:%M:%S'), timestamp_to=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), graph_type='line', format='json',  sensor_id=540090004)));
 
 if __name__ == "__main__":
     application.run()
