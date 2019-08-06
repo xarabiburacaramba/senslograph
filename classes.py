@@ -1,14 +1,18 @@
-from altair import Chart
+import altair as alt
 from pandas.io.json import json_normalize
 import json
 import requests
 
 class VegaGraph():
-    def __init__(self,type, data=None):
+    def __init__(self, title, type, data=None):
+        self._title=title
         self._type=type
         self._data=data
         self._chart=None
-    
+
+    def get_title(self):
+        return self._title
+        
     def get_data(self):
         return self._data
         
@@ -18,11 +22,29 @@ class VegaGraph():
     def get_type(self):
         return self._type
         
+    def get_chart(self):
+        return self._chart
+        
     def generate_visual(self):
-        self._chart = Chart(self._data).mark_point().encode(
-        x='time_stamp',
-        y='value'
-        ).interactive()
+        if self._type=='point':
+            self._chart = alt.Chart(self._data).mark_point().encode(
+            x=alt.X('time_stamp', axis=alt.Axis(title='Timestamp')),
+            y=alt.Y('value', axis=alt.Axis(title='Value')), 
+            color=alt.Color('unit_id:N', legend=alt.Legend(title="SensLog units"))
+            ).properties(title=self._title).interactive()
+        elif self._type=='line':
+            self._chart = alt.Chart(self._data).mark_line().encode(
+            x=alt.X('time_stamp', axis=alt.Axis(title='Timestamp')),
+            y=alt.Y('value', axis=alt.Axis(title='Value')), 
+            color=alt.Color('unit_id:N', legend=alt.Legend(title="SensLog units"))
+            ).properties(title=self._title).interactive()
+        elif self._type=='bar':
+            self._chart = alt.Chart(self._data).mark_bar().encode(
+            x='time_stamp',
+            y='value'
+            ).interactive()
+        else:
+            return json.dumps({'error':'this type is not supported!'})
         
     def export_visual(self, kind):
         if kind=='json':
@@ -69,5 +91,14 @@ class SensLogData():
         if r.status_code==200:
             a=json.loads(r.text)
             self._data=json_normalize(a, record_path='sensors', meta=['time_stamp','unit_id'])
+            if self._sensor_id!=None:
+                try:
+                    self._data=self._data[self._data['sensor_id']==self._sensor_id]
+                except:
+                    pass
         else:
             return json.dumps({'error':('error downloading data. status code:'+str(r.status_code))})
+
+#teplota napric jednotek
+#vsechna informace z jedne jednotky
+#mereni jedne veliciny pouze z jedne jednotky

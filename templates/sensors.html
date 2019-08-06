@@ -61,27 +61,26 @@
         <!-- Placeholder for the tooltip -->
         <div id="vis-tooltip" class="vg-tooltip"></div>
       </div>
-    </div>
-
+      
     <!-- Render Charts -->
     <script type="text/javascript">
+        
       function parse(div) {
+        
+        vegajsobject={{vegajsobject | safe}}
+        
         var opt = {
           mode: "vega-lite",
           renderer: "svg",
           actions: {export: true, source: false, editor: false}
         };
-
-        vegajsobject={{vegajsobject | safe}}
         
         vegaEmbed("#"+div,vegajsobject , opt, function(error, result) {
           vegaTooltip.vegaLite(result.view, vegajsobject);
         });
       }
-
-
       parse("sensor");
     </script>
-
+        
   </body>
 </html>
